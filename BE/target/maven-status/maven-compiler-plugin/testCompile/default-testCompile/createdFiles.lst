@@ -1,0 +1,4 @@
+com\claimtrace\iam\AuthorizationTests.class
+com\claimtrace\iam\RoleManagementTests.class
+com\claimtrace\iam\AuthenticationTests.class
+com\claimtrace\iam\UserManagementTests.class

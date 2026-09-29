@@ -1,0 +1,54 @@
+services:
+  # ============================================================================
+  # 1. PostgreSQL - Primary IAM Database
+  # ============================================================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: claimtrace-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: claimtrace_iam
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password123
+    ports:
+      - "5433:5432"
+    volumes:
+      - claimtrace_postgres_data:/var/lib/postgresql/data
+      - ./src/main/resources/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d claimtrace_iam"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - claimtrace-network
+
+  # ============================================================================
+  # 2. Redis - Distributed JWT Revocation & Token Blacklist
+  # ============================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: claimtrace-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - claimtrace_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - claimtrace-network
+
+volumes:
+  claimtrace_postgres_data:
+    name: claimtrace_postgres_data
+  claimtrace_redis_data:
+    name: claimtrace_redis_data
+
+networks:
+  claimtrace-network:
+    name: claimtrace_default
+    driver: bridge
