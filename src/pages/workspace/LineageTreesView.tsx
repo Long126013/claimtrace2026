@@ -21,7 +21,11 @@ import {
   ChevronRight,
   GitBranch,
   Layers,
-  Wrench
+  Wrench,
+  X,
+  Clock,
+  Activity,
+  Table as TableIcon
 } from 'lucide-react';
 
 import type { LineageBranchNode } from '../../types';
@@ -41,11 +45,17 @@ export const LineageTreesView: React.FC = () => {
   const [selectedNode, setSelectedNode] = useState<LineageBranchNode | null>(null);
   const [collapsedNodes, setCollapsedNodes] = useState<Record<string, boolean>>({});
   const [isReRunning, setIsReRunning] = useState(false);
+  const [timelineMode, setTimelineMode] = useState<'SNAPSHOT' | 'CURRENT'>('CURRENT');
+  const [viewMode, setViewMode] = useState<'DAG' | 'HEALTH_TABLE'>('DAG');
+  const [isToastDismissed, setIsToastDismissed] = useState(false);
+
+  const showInvalidationToast = isUpstreamChanged && !isToastDismissed;
 
   const activeClaim = claims.find((c) => c.id === activeClaimId) || claims[0];
   const activeAssembly = claimAssemblies[activeClaim.id];
-  const treeRoot = getClaimLineageTree(activeClaim.id, isUpstreamChanged, activeAssembly);
-  const isClaimStale = activeClaim.status === 'STALE';
+  const effectiveUpstreamChanged = timelineMode === 'SNAPSHOT' ? false : isUpstreamChanged;
+  const treeRoot = getClaimLineageTree(activeClaim.id, effectiveUpstreamChanged, activeAssembly);
+  const isClaimStale = activeClaim.status === 'STALE' && timelineMode === 'CURRENT';
 
   const handleCopyHash = (hash: string) => {
     navigator.clipboard.writeText(hash);
@@ -377,139 +387,390 @@ export const LineageTreesView: React.FC = () => {
               Branching Lineage Tree
             </span>
             <span className="text-slate-300">|</span>
-            <span className="text-slate-500 font-mono text-[11px]">
-              {activeClaim.claimCode} Evidence Graph
+            <span className="text-slate-500 font-mono text-[11px] hidden sm:inline">
+              {activeClaim.claimCode}
             </span>
+
+            {/* Bitemporal Snapshot Toggle (UI-07) */}
+            <div className="inline-flex rounded border border-slate-300 bg-slate-100 p-0.5 text-[11px] font-medium ml-2">
+              <button
+                type="button"
+                onClick={() => setTimelineMode('SNAPSHOT')}
+                title="View immutable state as recorded at manuscript submission"
+                className={`px-2.5 py-0.5 rounded transition-colors ${
+                  timelineMode === 'SNAPSHOT'
+                    ? 'bg-white text-slate-900 shadow-2xs font-semibold'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                Manuscript Snapshot (t_sub)
+              </button>
+              <button
+                type="button"
+                onClick={() => setTimelineMode('CURRENT')}
+                title="View current live state with upstream dataset mutations"
+                className={`px-2.5 py-0.5 rounded transition-colors ${
+                  timelineMode === 'CURRENT'
+                    ? 'bg-white text-slate-900 shadow-2xs font-semibold'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                Current State (t_now)
+              </button>
+            </div>
           </div>
 
           <div className="flex items-center space-x-2">
-            <Link
-              to={`/workspace/${projectId || 'proj-oncogen-01'}/curation`}
-              className="inline-flex items-center space-x-1.5 px-3 py-1 text-[11px] rounded bg-indigo-50 border border-indigo-200 text-indigo-700 font-semibold hover:bg-indigo-100 transition-colors shadow-2xs"
-            >
-              <Wrench className="w-3 h-3 text-indigo-600" />
-              <span>Assemble / Edit in Studio</span>
-            </Link>
+            {/* View Mode Switcher (Tree vs Health Table UI-08) */}
+            <div className="inline-flex rounded border border-slate-300 bg-slate-100 p-0.5 text-[11px] font-medium">
+              <button
+                type="button"
+                onClick={() => setViewMode('DAG')}
+                className={`px-2.5 py-0.5 rounded flex items-center space-x-1 transition-colors ${
+                  viewMode === 'DAG'
+                    ? 'bg-white text-slate-900 shadow-2xs font-semibold'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <GitFork className="w-3 h-3 mr-1 text-slate-500" />
+                <span>Lineage DAG</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode('HEALTH_TABLE')}
+                className={`px-2.5 py-0.5 rounded flex items-center space-x-1 transition-colors ${
+                  viewMode === 'HEALTH_TABLE'
+                    ? 'bg-white text-slate-900 shadow-2xs font-semibold'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <TableIcon className="w-3 h-3 mr-1 text-slate-500" />
+                <span>Claim Health Matrix</span>
+              </button>
+            </div>
 
-            <button
-              onClick={expandAll}
-              className="px-2.5 py-1 text-[11px] rounded border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 transition-colors"
-            >
-              Expand All
-            </button>
-            <button
-              onClick={collapseSubBranches}
-              className="px-2.5 py-1 text-[11px] rounded border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 transition-colors"
-            >
-              Collapse Deep Sub-Branches
-            </button>
+            {viewMode === 'DAG' && (
+              <>
+                <Link
+                  to={`/workspace/${projectId || 'proj-oncogen-01'}/curation`}
+                  className="inline-flex items-center space-x-1.5 px-3 py-1 text-[11px] rounded bg-indigo-50 border border-indigo-200 text-indigo-700 font-semibold hover:bg-indigo-100 transition-colors shadow-2xs"
+                >
+                  <Wrench className="w-3 h-3 text-indigo-600" />
+                  <span>Studio</span>
+                </Link>
+
+                <button
+                  onClick={expandAll}
+                  className="px-2.5 py-1 text-[11px] rounded border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 transition-colors"
+                >
+                  Expand All
+                </button>
+                <button
+                  onClick={collapseSubBranches}
+                  className="px-2.5 py-1 text-[11px] rounded border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 transition-colors"
+                >
+                  Collapse Sub-Branches
+                </button>
+              </>
+            )}
           </div>
         </div>
 
         {/* Main Scrollable Canvas */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
-          {/* Main Branching Tree Container */}
-          <div className="bg-white border border-slate-200 rounded-lg p-4 sm:p-6 shadow-2xs">
-            {/* Root Claim Node Header */}
-            <div className="p-4 rounded-lg border border-slate-900 bg-slate-900 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm mb-6">
-              <div>
-                <div className="flex items-center space-x-2">
-                  <span className="text-[10px] font-mono bg-emerald-400 text-slate-950 px-2 py-0.5 rounded font-bold uppercase">
-                    W3C Target Claim
-                  </span>
-                  <span className="text-xs font-mono text-slate-300">
-                    {activeClaim.claimCode}
-                  </span>
+          {viewMode === 'HEALTH_TABLE' ? (
+            /* UI-08: Claim Health Status Table */
+            <div className="space-y-4">
+              {/* Summary Metric Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                <div className="bg-white p-4 rounded-lg border border-slate-200 shadow-2xs">
+                  <span className="text-slate-400 font-mono text-[10px] uppercase font-bold block">Total Asserted Claims</span>
+                  <span className="text-2xl font-bold text-slate-900 font-mono">{claims.length}</span>
+                  <span className="text-[11px] text-slate-500 block mt-0.5">Anchored via W3C Selectors</span>
                 </div>
-                <h3 className="text-sm font-bold text-white mt-1 font-serif-prose">
-                  &ldquo;{activeClaim.selector.exactQuote}&rdquo;
-                </h3>
-              </div>
-
-              <div className="shrink-0">
-                {isClaimStale ? (
-                  <span className="text-xs font-mono font-bold px-3 py-1 rounded bg-amber-400 text-amber-950 flex items-center shadow-xs">
-                    <AlertTriangle className="w-3.5 h-3.5 mr-1" />
-                    STALE CLAIM DETECTED
-                  </span>
-                ) : (
-                  <span className="text-xs font-mono font-semibold px-3 py-1 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 flex items-center">
-                    <CheckCircle2 className="w-3.5 h-3.5 mr-1 text-emerald-400" />
-                    VERIFIED CRYPTOGRAPHIC CHAIN
-                  </span>
-                )}
-              </div>
-            </div>
-
-            {/* Tree Branches */}
-            <div className="border-l-2 border-slate-200 ml-4 pl-2 space-y-4">
-              {treeRoot.children && treeRoot.children.map((child, idx) => 
-                renderBranchNode(child, 1, idx === treeRoot.children!.length - 1)
-              )}
-            </div>
-          </div>
-
-          {/* Inspected Node Inspector Card (if a node is clicked) */}
-          {selectedNode && (
-            <div className="bg-slate-50 border border-slate-300 rounded-lg p-4 text-xs space-y-3 animate-in fade-in duration-100">
-              <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-                <div className="flex items-center space-x-2">
-                  {getNodeIcon(selectedNode.category)}
-                  <span className="font-bold text-slate-900 font-mono">
-                    {selectedNode.name}
-                  </span>
+                <div className="bg-white p-4 rounded-lg border border-slate-200 shadow-2xs">
+                  <span className="text-slate-400 font-mono text-[10px] uppercase font-bold block">Verified Integrity</span>
+                  <span className="text-2xl font-bold text-emerald-700 font-mono">{claims.filter(c => c.status !== 'STALE').length}</span>
+                  <span className="text-[11px] text-emerald-600 block mt-0.5">Full DAG Hash Match</span>
                 </div>
-                <button
-                  onClick={() => setSelectedNode(null)}
-                  className="text-slate-400 hover:text-slate-700 text-xs font-medium"
-                >
-                  Close Details
-                </button>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div className="bg-white p-2.5 rounded border border-slate-200">
-                  <span className="text-slate-400 font-mono text-[10px] block uppercase font-bold">Category:</span>
-                  <span className="font-semibold text-slate-800 font-mono">{selectedNode.category}</span>
+                <div className="bg-white p-4 rounded-lg border border-slate-200 shadow-2xs">
+                  <span className="text-slate-400 font-mono text-[10px] uppercase font-bold block">Stale / Disrupted</span>
+                  <span className="text-2xl font-bold text-amber-700 font-mono">{claims.filter(c => c.status === 'STALE').length}</span>
+                  <span className="text-[11px] text-amber-600 block mt-0.5">Require Re-computation</span>
                 </div>
-
-                <div className="bg-white p-2.5 rounded border border-slate-200">
-                  <span className="text-slate-400 font-mono text-[10px] block uppercase font-bold">Relationship:</span>
-                  <span className="font-semibold text-slate-800 font-mono">{selectedNode.relationship || 'Root Entity'}</span>
-                </div>
-
-                <div className="bg-white p-2.5 rounded border border-slate-200">
-                  <span className="text-slate-400 font-mono text-[10px] block uppercase font-bold">Status:</span>
-                  <span className={`font-semibold font-mono ${
-                    selectedNode.status === 'MISMATCH' ? 'text-red-700' : 'text-emerald-700'
-                  }`}>
-                    {selectedNode.status}
+                <div className="bg-white p-4 rounded-lg border border-slate-200 shadow-2xs">
+                  <span className="text-slate-400 font-mono text-[10px] uppercase font-bold block">Global Lineage Health</span>
+                  <span className={`text-2xl font-bold font-mono ${isUpstreamChanged ? 'text-amber-700' : 'text-emerald-700'}`}>
+                    {isUpstreamChanged ? '82%' : '100%'}
+                  </span>
+                  <span className="text-[11px] text-slate-500 block mt-0.5">
+                    {isUpstreamChanged ? 'Root Divergence Detected' : 'Cryptographically Sound'}
                   </span>
                 </div>
               </div>
 
-              {selectedNode.detail && (
-                <div className="bg-white p-2.5 rounded border border-slate-200 text-slate-700">
-                  <span className="text-slate-400 font-mono text-[10px] block uppercase font-bold mb-0.5">Description & Role:</span>
-                  {selectedNode.detail}
-                </div>
-              )}
-
-              {selectedNode.hash && (
-                <div className="bg-white p-2.5 rounded border border-slate-200 font-mono text-[11px] flex items-center justify-between">
-                  <span className="truncate mr-2">
-                    <span className="text-slate-400 mr-2">SHA-256:</span>
-                    <span className="text-slate-900">{selectedNode.hash}</span>
-                  </span>
+              {/* Claims Table */}
+              <div className="bg-white border border-slate-200 rounded-lg overflow-hidden shadow-2xs">
+                <div className="p-4 border-b border-slate-200 flex items-center justify-between">
+                  <div>
+                    <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                      Workspace Claims Health Status Table (UI-08)
+                    </h3>
+                    <p className="text-[11px] text-slate-500">
+                      Real-time status overview of all scientific claims and their upstream dependencies
+                    </p>
+                  </div>
                   <button
-                    onClick={() => handleCopyHash(selectedNode.hash || '')}
-                    className="text-slate-500 hover:text-slate-900"
+                    onClick={handleReRun}
+                    disabled={isReRunning}
+                    className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-slate-900 text-white rounded text-xs font-medium hover:bg-slate-800 transition-colors disabled:opacity-50 shadow-2xs"
                   >
-                    <Copy className="w-3.5 h-3.5" />
+                    <RefreshCw className={`w-3.5 h-3.5 ${isReRunning ? 'animate-spin' : ''}`} />
+                    <span>{isReRunning ? 'Verifying all...' : 'Verify All Claims'}</span>
                   </button>
                 </div>
-              )}
+
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs border-collapse">
+                    <thead>
+                      <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 font-mono text-[11px]">
+                        <th className="py-2.5 px-4 font-semibold">Claim ID</th>
+                        <th className="py-2.5 px-4 font-semibold">Manuscript Extract / Statement</th>
+                        <th className="py-2.5 px-4 font-semibold">Integrity Status</th>
+                        <th className="py-2.5 px-4 font-semibold">Upstream Dependencies</th>
+                        <th className="py-2.5 px-4 font-semibold">Last Checked</th>
+                        <th className="py-2.5 px-4 font-semibold text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {claims.map((c) => {
+                        const isStale = c.status === 'STALE';
+                        return (
+                          <tr key={c.id} className="hover:bg-slate-50 transition-colors">
+                            <td className="py-3 px-4 font-mono font-bold text-slate-900 whitespace-nowrap">
+                              {c.claimCode}
+                            </td>
+                            <td className="py-3 px-4 max-w-md">
+                              <div className="font-serif text-slate-800 line-clamp-2">
+                                &ldquo;{c.selector.exactQuote}&rdquo;
+                              </div>
+                              {c.title && (
+                                <div className="text-[10px] text-slate-400 font-sans mt-0.5">
+                                  {c.title}
+                                </div>
+                              )}
+                            </td>
+                            <td className="py-3 px-4 whitespace-nowrap">
+                              {isStale ? (
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-50 text-amber-900 border border-amber-300">
+                                  <AlertTriangle className="w-3 h-3 mr-1 text-amber-600" />
+                                  STALE (Edge Divergence)
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-50 text-emerald-900 border border-emerald-300">
+                                  <CheckCircle2 className="w-3 h-3 mr-1 text-emerald-600" />
+                                  VERIFIED (PROV-O Valid)
+                                </span>
+                              )}
+                            </td>
+                            <td className="py-3 px-4 font-mono text-[11px] text-slate-600 whitespace-nowrap">
+                              <span className="bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                                4 entities (1 Data, 1 Code, 1 Run, 1 Fig)
+                              </span>
+                            </td>
+                            <td className="py-3 px-4 font-mono text-[11px] text-slate-500 whitespace-nowrap">
+                              {c.boundAt || '2024-03-15 14:22 UTC'}
+                            </td>
+                            <td className="py-3 px-4 text-right space-x-2 whitespace-nowrap">
+                              <button
+                                onClick={() => {
+                                  setActiveClaimId(c.id);
+                                  setViewMode('DAG');
+                                }}
+                                className="px-2.5 py-1 bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 rounded text-[11px] font-medium transition-colors shadow-2xs"
+                              >
+                                Inspect Lineage
+                              </button>
+                              <button
+                                onClick={handleReRun}
+                                disabled={isReRunning}
+                                className="px-2.5 py-1 bg-slate-900 hover:bg-slate-800 text-white rounded text-[11px] font-medium transition-colors shadow-2xs disabled:opacity-50"
+                              >
+                                Re-verify
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
+          ) : (
+            /* UI-07: Interactive Branching Derivation Tree */
+            <>
+              {timelineMode === 'SNAPSHOT' && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-xs text-blue-900 flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <Clock className="w-4 h-4 text-blue-600" />
+                    <span className="font-semibold">Bitemporal Snapshot Mode:</span>
+                    <span>Displaying immutable lineage as recorded at manuscript submission (2024-03-15T09:30:00Z). Mutations disabled.</span>
+                  </div>
+                  <span className="font-mono text-[10px] bg-white text-blue-700 px-2 py-0.5 rounded border border-blue-300 font-bold uppercase">
+                    Frozen t_sub
+                  </span>
+                </div>
+              )}
+
+              {/* Main Branching Tree Container */}
+              <div className="bg-white border border-slate-200 rounded-lg p-4 sm:p-6 shadow-2xs">
+                {/* Root Claim Node Header */}
+                <div className="p-4 rounded-lg border border-slate-900 bg-slate-900 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm mb-6">
+                  <div>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-[10px] font-mono bg-emerald-400 text-slate-950 px-2 py-0.5 rounded font-bold uppercase">
+                        W3C Target Claim
+                      </span>
+                      <span className="text-xs font-mono text-slate-300">
+                        {activeClaim.claimCode}
+                      </span>
+                    </div>
+                    <h3 className="text-sm font-bold text-white mt-1 font-serif-prose">
+                      &ldquo;{activeClaim.selector.exactQuote}&rdquo;
+                    </h3>
+                  </div>
+
+                  <div className="shrink-0">
+                    {isClaimStale ? (
+                      <span className="text-xs font-mono font-bold px-3 py-1 rounded bg-amber-400 text-amber-950 flex items-center shadow-xs">
+                        <AlertTriangle className="w-3.5 h-3.5 mr-1" />
+                        STALE CLAIM DETECTED
+                      </span>
+                    ) : (
+                      <span className="text-xs font-mono font-semibold px-3 py-1 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 flex items-center">
+                        <CheckCircle2 className="w-3.5 h-3.5 mr-1 text-emerald-400" />
+                        VERIFIED CRYPTOGRAPHIC CHAIN
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Tree Branches */}
+                <div className="border-l-2 border-slate-200 ml-4 pl-2 space-y-4">
+                  {treeRoot.children && treeRoot.children.map((child, idx) => 
+                    renderBranchNode(child, 1, idx === treeRoot.children!.length - 1)
+                  )}
+                </div>
+              </div>
+
+              {/* Inspected Node Inspector Card (UI-07 Bitemporal details) */}
+              {selectedNode && (
+                <div className="bg-slate-50 border border-slate-300 rounded-lg p-4 text-xs space-y-3 animate-in fade-in duration-100">
+                  <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                    <div className="flex items-center space-x-2">
+                      {getNodeIcon(selectedNode.category)}
+                      <span className="font-bold text-slate-900 font-mono">
+                        {selectedNode.name}
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => setSelectedNode(null)}
+                      className="text-slate-400 hover:text-slate-700 text-xs font-medium"
+                    >
+                      Close Details
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="bg-white p-2.5 rounded border border-slate-200">
+                      <span className="text-slate-400 font-mono text-[10px] block uppercase font-bold">Category:</span>
+                      <span className="font-semibold text-slate-800 font-mono">{selectedNode.category}</span>
+                    </div>
+
+                    <div className="bg-white p-2.5 rounded border border-slate-200">
+                      <span className="text-slate-400 font-mono text-[10px] block uppercase font-bold">Relationship:</span>
+                      <span className="font-semibold text-slate-800 font-mono">{selectedNode.relationship || 'Root Entity'}</span>
+                    </div>
+
+                    <div className="bg-white p-2.5 rounded border border-slate-200">
+                      <span className="text-slate-400 font-mono text-[10px] block uppercase font-bold">Status:</span>
+                      <span className={`font-semibold font-mono ${
+                        selectedNode.status === 'MISMATCH' ? 'text-red-700' : 'text-emerald-700'
+                      }`}>
+                        {selectedNode.status}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Bitemporal Coordinates (UI-07) */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                    <div className="bg-white p-2.5 rounded border border-slate-200">
+                      <div className="flex items-center text-slate-400 font-mono text-[10px] uppercase font-bold mb-0.5">
+                        <Clock className="w-3 h-3 mr-1 text-slate-500" />
+                        <span>Valid Time (t_valid):</span>
+                      </div>
+                      <span className="font-mono text-slate-800 text-[11px]">
+                        2024-03-15T09:30:00Z (Experimental Observation)
+                      </span>
+                    </div>
+
+                    <div className="bg-white p-2.5 rounded border border-slate-200">
+                      <div className="flex items-center text-slate-400 font-mono text-[10px] uppercase font-bold mb-0.5">
+                        <Activity className="w-3 h-3 mr-1 text-slate-500" />
+                        <span>Transaction Time (t_tx):</span>
+                      </div>
+                      <span className="font-mono text-slate-800 text-[11px]">
+                        2024-03-15T14:22:10Z (System Ledger Commit)
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Downstream Blast Radius (UI-07) */}
+                  <div className="bg-white p-2.5 rounded border border-slate-200">
+                    <span className="text-slate-400 font-mono text-[10px] block uppercase font-bold mb-1">
+                      Downstream Blast Radius (Impact Analysis):
+                    </span>
+                    <div className="space-y-1">
+                      <div className="flex items-center space-x-2 text-slate-700 font-mono text-[11px]">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                        <span>CLM-001 (Direct Dependency: Overall survival HR=0.68)</span>
+                      </div>
+                      <div className="flex items-center space-x-2 text-slate-700 font-mono text-[11px]">
+                        <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+                        <span>CLM-002 (Indirect Dependency: Progression-free survival delta)</span>
+                      </div>
+                      <div className="flex items-center space-x-2 text-slate-700 font-mono text-[11px]">
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
+                        <span>Figure 4B (Kaplan-Meier survival curves)</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {selectedNode.detail && (
+                    <div className="bg-white p-2.5 rounded border border-slate-200 text-slate-700">
+                      <span className="text-slate-400 font-mono text-[10px] block uppercase font-bold mb-0.5">Description & Role:</span>
+                      {selectedNode.detail}
+                    </div>
+                  )}
+
+                  {selectedNode.hash && (
+                    <div className="bg-white p-2.5 rounded border border-slate-200 font-mono text-[11px] flex items-center justify-between">
+                      <span className="truncate mr-2">
+                        <span className="text-slate-400 mr-2">SHA-256:</span>
+                        <span className="text-slate-900">{selectedNode.hash}</span>
+                      </span>
+                      <button
+                        onClick={() => handleCopyHash(selectedNode.hash || '')}
+                        className="text-slate-500 hover:text-slate-900"
+                      >
+                        <Copy className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </>
           )}
         </div>
 
@@ -549,6 +810,53 @@ export const LineageTreesView: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* UI-08 Invalidation Toast */}
+        {isUpstreamChanged && showInvalidationToast && (
+          <div className="fixed top-20 right-6 z-50 max-w-md bg-white border border-red-300 rounded-lg shadow-xl p-4 animate-in slide-in-from-top-2 duration-200">
+            <div className="flex items-start justify-between">
+              <div className="flex items-start space-x-2.5">
+                <AlertTriangle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
+                <div>
+                  <div className="text-xs font-bold text-red-900 uppercase tracking-wide">
+                    Provenance Disruption Detected
+                  </div>
+                  <p className="text-[11px] text-slate-700 mt-1 leading-relaxed">
+                    Root dataset <code className="bg-red-50 text-red-800 px-1 py-0.2 rounded font-mono">cohort_clinical_raw.csv</code> mutated. 1 Claim marked as <strong className="text-red-900">STALE</strong>.
+                  </p>
+                  <div className="text-[11px] text-slate-500 mt-1 font-mono">
+                    Downstream Blast Radius: 2 claims, 1 figure.
+                  </div>
+                  <div className="mt-2.5 flex items-center space-x-2">
+                    <button
+                      onClick={() => {
+                        setActiveClaimId('claim-01');
+                        setViewMode('DAG');
+                        setIsToastDismissed(true);
+                      }}
+                      className="px-2.5 py-1 bg-red-700 hover:bg-red-800 text-white rounded text-[11px] font-semibold transition-colors shadow-2xs"
+                    >
+                      View Affected Claims
+                    </button>
+                    <button
+                      onClick={handleReRun}
+                      disabled={isReRunning}
+                      className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded text-[11px] font-medium transition-colors"
+                    >
+                      {isReRunning ? 'Re-verifying...' : 'Re-verify'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsToastDismissed(true)}
+                className="text-slate-400 hover:text-slate-600 ml-2"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

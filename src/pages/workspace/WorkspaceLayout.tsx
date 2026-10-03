@@ -13,7 +13,11 @@ import {
   ShieldCheck, 
   GitFork, 
   AlertTriangle,
-  Layers
+  Layers,
+  Sparkles,
+  GitCompare,
+  EyeOff,
+  Award
 } from 'lucide-react';
 
 export const WorkspaceLayout: React.FC = () => {
@@ -40,12 +44,12 @@ export const WorkspaceLayout: React.FC = () => {
       <Header />
 
       {/* Sub-Navigation Tabs Bar */}
-      <nav className="h-11 px-4 md:px-6 bg-white border-b border-slate-200 flex items-center justify-between shrink-0 select-none">
-        <div className="flex items-center space-x-1 sm:space-x-2 text-xs overflow-x-auto py-1">
+      <nav className="h-11 px-4 md:px-6 bg-white border-b border-slate-200 flex items-center justify-between shrink-0 select-none overflow-x-auto">
+        <div className="flex items-center space-x-1 sm:space-x-1.5 text-xs overflow-x-auto py-1">
           <NavLink
             to={`/workspace/${projectId || 'proj-oncogen-01'}/sources`}
             className={({ isActive }) =>
-              `flex items-center space-x-1.5 px-3 py-1.5 rounded-sm font-medium transition-colors border ${
+              `flex items-center space-x-1.5 px-2.5 py-1.5 rounded-sm font-medium transition-colors border whitespace-nowrap ${
                 isActive
                   ? 'bg-slate-100 text-slate-900 border-slate-300 font-semibold'
                   : 'text-slate-600 border-transparent hover:text-slate-900 hover:bg-slate-50'
@@ -53,7 +57,7 @@ export const WorkspaceLayout: React.FC = () => {
             }
           >
             <FileText className="w-3.5 h-3.5 text-slate-500" />
-            <span>Manuscript & Versioning</span>
+            <span>Manuscript</span>
             <span className="text-[10px] font-mono bg-white px-1.5 py-0.2 rounded border border-slate-200 text-slate-600">
               {claims.length}
             </span>
@@ -62,7 +66,7 @@ export const WorkspaceLayout: React.FC = () => {
           <NavLink
             to={`/workspace/${projectId || 'proj-oncogen-01'}/evidence`}
             className={({ isActive }) =>
-              `flex items-center space-x-1.5 px-3 py-1.5 rounded-sm font-medium transition-colors border ${
+              `flex items-center space-x-1.5 px-2.5 py-1.5 rounded-sm font-medium transition-colors border whitespace-nowrap ${
                 isActive
                   ? 'bg-slate-100 text-slate-900 border-slate-300 font-semibold'
                   : 'text-slate-600 border-transparent hover:text-slate-900 hover:bg-slate-50'
@@ -70,7 +74,7 @@ export const WorkspaceLayout: React.FC = () => {
             }
           >
             <Database className="w-3.5 h-3.5 text-slate-500" />
-            <span>Evidence & Artifacts</span>
+            <span>Evidence</span>
             <span className="text-[10px] font-mono bg-white px-1.5 py-0.2 rounded border border-slate-200 text-slate-600">
               {artifacts.length}
             </span>
@@ -79,7 +83,7 @@ export const WorkspaceLayout: React.FC = () => {
           <NavLink
             to={`/workspace/${projectId || 'proj-oncogen-01'}/ai-governance`}
             className={({ isActive }) =>
-              `flex items-center space-x-1.5 px-3 py-1.5 rounded-sm font-medium transition-colors border ${
+              `flex items-center space-x-1.5 px-2.5 py-1.5 rounded-sm font-medium transition-colors border whitespace-nowrap ${
                 isActive
                   ? 'bg-slate-100 text-slate-900 border-slate-300 font-semibold'
                   : 'text-slate-600 border-transparent hover:text-slate-900 hover:bg-slate-50'
@@ -87,16 +91,44 @@ export const WorkspaceLayout: React.FC = () => {
             }
           >
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-700" />
-            <span>AI Interaction & COPE Audit</span>
+            <span>AI COPE</span>
             <span className="text-[10px] font-mono bg-white px-1.5 py-0.2 rounded border border-slate-200 text-slate-600">
               {aiRecords.length}
             </span>
           </NavLink>
 
           <NavLink
+            to={`/workspace/${projectId || 'proj-oncogen-01'}/triage`}
+            className={({ isActive }) =>
+              `flex items-center space-x-1.5 px-2.5 py-1.5 rounded-sm font-medium transition-colors border whitespace-nowrap ${
+                isActive
+                  ? 'bg-purple-50 text-purple-900 border-purple-300 font-semibold'
+                  : 'text-slate-600 border-transparent hover:text-slate-900 hover:bg-slate-50'
+              }`
+            }
+          >
+            <Sparkles className="w-3.5 h-3.5 text-purple-600" />
+            <span>AI Triage</span>
+          </NavLink>
+
+          <NavLink
+            to={`/workspace/${projectId || 'proj-oncogen-01'}/diff`}
+            className={({ isActive }) =>
+              `flex items-center space-x-1.5 px-2.5 py-1.5 rounded-sm font-medium transition-colors border whitespace-nowrap ${
+                isActive
+                  ? 'bg-amber-50 text-amber-900 border-amber-300 font-semibold'
+                  : 'text-slate-600 border-transparent hover:text-slate-900 hover:bg-slate-50'
+              }`
+            }
+          >
+            <GitCompare className="w-3.5 h-3.5 text-amber-600" />
+            <span>Diff & Anchors</span>
+          </NavLink>
+
+          <NavLink
             to={`/workspace/${projectId || 'proj-oncogen-01'}/curation`}
             className={({ isActive }) =>
-              `flex items-center space-x-1.5 px-3 py-1.5 rounded-sm font-medium transition-colors border ${
+              `flex items-center space-x-1.5 px-2.5 py-1.5 rounded-sm font-medium transition-colors border whitespace-nowrap ${
                 isActive
                   ? 'bg-indigo-50 text-indigo-900 border-indigo-300 font-semibold'
                   : 'text-slate-600 border-transparent hover:text-slate-900 hover:bg-slate-50'
@@ -104,16 +136,13 @@ export const WorkspaceLayout: React.FC = () => {
             }
           >
             <Layers className="w-3.5 h-3.5 text-indigo-700" />
-            <span>Claim Evidence Studio</span>
-            <span className="text-[10px] font-mono bg-white px-1.5 py-0.2 rounded border border-indigo-200 text-indigo-700 font-semibold">
-              AUTHORING
-            </span>
+            <span>Studio</span>
           </NavLink>
 
           <NavLink
             to={`/workspace/${projectId || 'proj-oncogen-01'}/lineage-trees`}
             className={({ isActive }) =>
-              `flex items-center space-x-1.5 px-3 py-1.5 rounded-sm font-medium transition-colors border ${
+              `flex items-center space-x-1.5 px-2.5 py-1.5 rounded-sm font-medium transition-colors border whitespace-nowrap ${
                 isActive
                   ? 'bg-slate-100 text-slate-900 border-slate-300 font-semibold'
                   : 'text-slate-600 border-transparent hover:text-slate-900 hover:bg-slate-50'
@@ -121,7 +150,7 @@ export const WorkspaceLayout: React.FC = () => {
             }
           >
             <GitFork className="w-3.5 h-3.5 text-slate-500" />
-            <span>Lineage Trees & Claims</span>
+            <span>Lineage Trees</span>
             {staleClaimsCount > 0 ? (
               <span className="text-[10px] font-mono bg-[#FEF9C3] text-[#92400E] px-1.5 py-0.2 rounded border border-[#FDE68A] font-bold flex items-center">
                 <AlertTriangle className="w-2.5 h-2.5 mr-0.5 inline" />
@@ -133,12 +162,40 @@ export const WorkspaceLayout: React.FC = () => {
               </span>
             )}
           </NavLink>
+
+          <NavLink
+            to={`/workspace/${projectId || 'proj-oncogen-01'}/audit`}
+            className={({ isActive }) =>
+              `flex items-center space-x-1.5 px-2.5 py-1.5 rounded-sm font-medium transition-colors border whitespace-nowrap ${
+                isActive
+                  ? 'bg-rose-50 text-rose-900 border-rose-300 font-semibold'
+                  : 'text-slate-600 border-transparent hover:text-slate-900 hover:bg-slate-50'
+              }`
+            }
+          >
+            <EyeOff className="w-3.5 h-3.5 text-rose-600" />
+            <span>Audit View</span>
+          </NavLink>
+
+          <NavLink
+            to={`/workspace/${projectId || 'proj-oncogen-01'}/credit`}
+            className={({ isActive }) =>
+              `flex items-center space-x-1.5 px-2.5 py-1.5 rounded-sm font-medium transition-colors border whitespace-nowrap ${
+                isActive
+                  ? 'bg-blue-50 text-blue-900 border-blue-300 font-semibold'
+                  : 'text-slate-600 border-transparent hover:text-slate-900 hover:bg-slate-50'
+              }`
+            }
+          >
+            <Award className="w-3.5 h-3.5 text-blue-600" />
+            <span>CRediT Matrix</span>
+          </NavLink>
         </div>
 
         {/* Right contextual info */}
-        <div className="hidden lg:flex items-center space-x-3 text-xs text-slate-500">
-          <span className="font-mono text-[11px]">
-            W3C Open Annotation RFC 7089 • PROV-O
+        <div className="hidden xl:flex items-center space-x-3 text-xs text-slate-500 pl-2">
+          <span className="font-mono text-[11px] whitespace-nowrap">
+            W3C RFC 7089 • PROV-O
           </span>
         </div>
       </nav>

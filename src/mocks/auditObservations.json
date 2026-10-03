@@ -1,0 +1,20 @@
+[
+  {
+    "id": "obs-001",
+    "claimId": "claim-1",
+    "auditorName": "Prof. Kenji Takahashi",
+    "orcid": "0000-0002-9901-3142",
+    "timestamp": "2025-05-20T11:30:00Z",
+    "severity": "COMPLIANT",
+    "notes": "Cryptographic pipeline hash verified against Docker Python 3.11 evaluation harness. Bootstrap CI 0.89-0.95 replicated exactly with deterministic random seed 42."
+  },
+  {
+    "id": "obs-002",
+    "claimId": "claim-2",
+    "auditorName": "Dr. Sarah Jenkins",
+    "orcid": "0000-0003-4412-8819",
+    "timestamp": "2025-05-20T14:45:10Z",
+    "severity": "MINOR_CONCERN",
+    "notes": "Synthetic noise perturbation matrix is reproducible, but raw patient demographic subsetting lacked explicit exclusion logging in early revision."
+  }
+]

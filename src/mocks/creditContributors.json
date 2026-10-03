@@ -1,0 +1,59 @@
+[
+  {
+    "id": "contr-001",
+    "name": "Prof. Elena Rostova",
+    "email": "e.rostova@stanford.edu",
+    "orcid": "0000-0002-1825-0097",
+    "isAi": false,
+    "institution": "Stanford University",
+    "roles": [
+      "Conceptualization",
+      "Funding Acquisition",
+      "Project Administration",
+      "Supervision",
+      "Writing – Review & Editing"
+    ]
+  },
+  {
+    "id": "contr-002",
+    "name": "Dr. Marcus Vance",
+    "email": "m.vance@mit.edu",
+    "orcid": "0000-0001-9283-4412",
+    "isAi": false,
+    "institution": "MIT CSAIL",
+    "roles": [
+      "Data Curation",
+      "Formal Analysis",
+      "Investigation",
+      "Methodology",
+      "Software",
+      "Validation",
+      "Visualization",
+      "Writing – Original Draft"
+    ]
+  },
+  {
+    "id": "contr-003",
+    "name": "Sarah Jenkins, M.Sc.",
+    "email": "s.jenkins@ox.ac.uk",
+    "orcid": "0000-0003-4412-8819",
+    "isAi": false,
+    "institution": "Oxford Genomics Institute",
+    "roles": [
+      "Data Curation",
+      "Resources",
+      "Validation"
+    ]
+  },
+  {
+    "id": "contr-ai-001",
+    "name": "GPT-4o (AI Computational Assistant)",
+    "email": "ai-assistance@openai.com",
+    "isAi": true,
+    "institution": "OpenAI / Stanford OncoGen Sandbox",
+    "roles": [
+      "Software"
+    ],
+    "aiDisclosureDetail": "COPE 2023 Co-Authorship Transparency: Generative AI assisted in vectorizing PyTorch normalization loops and writing draft boilerplate for Table 2."
+  }
+]

@@ -38,6 +38,7 @@ public class DataInitializer implements CommandLineRunner {
     public void run(String... args) {
         initRoles();
         initDefaultAdmin();
+        initDemoUsers();
     }
 
     private void initRoles() {
@@ -51,36 +52,44 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private void initDefaultAdmin() {
-        String adminEmail = "admin@claimtrace.com";
-        Optional<User> existingAdmin = userRepository.findByEmailIgnoreCase(adminEmail);
+        seedUser("admin@claimtrace.com", "System Administrator", "Admin@123", RoleName.ADMIN);
+    }
 
-        Role adminRole = roleRepository.findByName(RoleName.ADMIN.name())
-                .orElseGet(() -> roleRepository.save(new Role(RoleName.ADMIN.name())));
+    private void initDemoUsers() {
+        seedUser("alice.vance@mit.edu", "Dr. Alice Vance", "Password@123", RoleName.RESEARCHER);
+        seedUser("pi.smith@stanford.edu", "Prof. Robert Smith (PI)", "Password@123", RoleName.PRINCIPAL_INVESTIGATOR);
+        seedUser("reviewer@nature.org", "Dr. Helena Chen (Auditor)", "Password@123", RoleName.REVIEWER);
+    }
 
-        if (existingAdmin.isEmpty()) {
-            User admin = new User();
-            admin.setEmail(adminEmail);
-            admin.setFullName("System Administrator");
-            admin.setPasswordHash(passwordEncoder.encode("Admin@123"));
-            admin.setEnabled(true);
+    private void seedUser(String email, String fullName, String rawPassword, RoleName roleName) {
+        String normalizedEmail = email.trim().toLowerCase();
+        Optional<User> existing = userRepository.findByEmailIgnoreCase(normalizedEmail);
+
+        Role role = roleRepository.findByName(roleName.name())
+                .orElseGet(() -> roleRepository.save(new Role(roleName.name())));
+
+        if (existing.isEmpty()) {
+            User user = new User();
+            user.setEmail(normalizedEmail);
+            user.setFullName(fullName);
+            user.setPasswordHash(passwordEncoder.encode(rawPassword));
+            user.setEnabled(true);
 
             Set<Role> roles = new HashSet<>();
-            roles.add(adminRole);
-            admin.setRoles(roles);
+            roles.add(role);
+            user.setRoles(roles);
 
-            userRepository.save(admin);
-            log.info("Seeded default admin user: email={}, password=Admin@123", adminEmail);
+            userRepository.save(user);
+            log.info("Seeded demo user: email={}, role={}, password={}", normalizedEmail, roleName.name(), rawPassword);
         } else {
-            User admin = existingAdmin.get();
-            // Ensure admin role is assigned
-            if (admin.getRoles() == null || admin.getRoles().stream().noneMatch(r -> r.getName().equals(RoleName.ADMIN.name()))) {
-                admin.addRole(adminRole);
+            User user = existing.get();
+            if (user.getRoles() == null || user.getRoles().stream().noneMatch(r -> r.getName().equals(roleName.name()))) {
+                user.addRole(role);
             }
-            // Ensure admin has valid password hash for Admin@123 so demonstration works reliably
-            admin.setPasswordHash(passwordEncoder.encode("Admin@123"));
-            admin.setEnabled(true);
-            userRepository.save(admin);
-            log.info("Verified and updated default admin user: email={}, password=Admin@123", adminEmail);
+            user.setPasswordHash(passwordEncoder.encode(rawPassword));
+            user.setEnabled(true);
+            userRepository.save(user);
+            log.info("Verified demo user: email={}, role={}, password={}", normalizedEmail, roleName.name(), rawPassword);
         }
     }
 }

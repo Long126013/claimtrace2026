@@ -18,6 +18,8 @@ public class RegisterRequest {
     @Size(min = 2, max = 100, message = "Full name must be between 2 and 100 characters")
     private String fullName;
 
+    private String role;
+
     public RegisterRequest() {
     }
 
@@ -25,6 +27,13 @@ public class RegisterRequest {
         this.email = email;
         this.password = password;
         this.fullName = fullName;
+    }
+
+    public RegisterRequest(String email, String password, String fullName, String role) {
+        this.email = email;
+        this.password = password;
+        this.fullName = fullName;
+        this.role = role;
     }
 
     public String getEmail() {
@@ -49,5 +58,13 @@ public class RegisterRequest {
 
     public void setFullName(String fullName) {
         this.fullName = fullName;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 }

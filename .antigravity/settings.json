@@ -1,0 +1,51 @@
+{
+  "$schema": "https://antigravity.google/schemas/project-settings.json",
+  "project": "ClaimTrace",
+  "permissions": {
+    "tool_execution_policy": "always-proceed",
+    "terminal_sandbox": false,
+    "non_workspace_file_access": "deny",
+    "internet_access_policy": "allow",
+    "artifact_review_mode": "always-proceed"
+  },
+  "agent_permissions": {
+    "orchestrator": {
+      "description": "Điều phối toàn bộ dự án, có quyền điều phối subagents và đọc/ghi kế hoạch",
+      "enable_write_tools": true,
+      "enable_subagent_tools": true,
+      "enable_mcp_tools": true,
+      "allowed_commands": ["git *", "npm *", "npx *", "mvn *"]
+    },
+    "requirements_analyst": {
+      "description": "Đọc tài liệu, phân tích yêu cầu và xuất bản tài liệu đặc tả",
+      "enable_write_tools": true,
+      "enable_subagent_tools": false,
+      "enable_mcp_tools": false,
+      "allowed_paths": [".antigravity/artifacts/*", "specs/*", "docs/*", "REQUIREMENTS.md"]
+    },
+    "frontend_engineer": {
+      "description": "Phát triển giao diện React, Tailwind, quản trị state và chạy lệnh build/lint frontend",
+      "enable_write_tools": true,
+      "enable_subagent_tools": false,
+      "enable_mcp_tools": true,
+      "allowed_commands": ["npm *", "npx *", "node *"],
+      "allowed_paths": ["src/*", "public/*", "package.json", "tsconfig*.json", "vite.config.ts"]
+    },
+    "backend_engineer": {
+      "description": "Phát triển backend Java IAM và dịch vụ W3C PROV-O, API, database",
+      "enable_write_tools": true,
+      "enable_subagent_tools": false,
+      "enable_mcp_tools": true,
+      "allowed_commands": ["mvn *", "./mvnw *", "npm *", "npx *", "docker *"],
+      "allowed_paths": ["BE/*", "src/services/*", "schemas/*", "api/*"]
+    },
+    "qa_test_engineer": {
+      "description": "Kiểm thử tự động, chạy static analysis và viết báo cáo chất lượng",
+      "enable_write_tools": true,
+      "enable_subagent_tools": false,
+      "enable_mcp_tools": false,
+      "allowed_commands": ["npx tsc *", "npm run lint *", "npm run test *", "npm test *", "npm run build *", "mvn test *"],
+      "allowed_paths": ["tests/*", ".antigravity/artifacts/*"]
+    }
+  }
+}

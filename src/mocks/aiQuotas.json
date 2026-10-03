@@ -1,0 +1,47 @@
+{
+  "projectId": "proj-oncogen-01",
+  "projectName": "OncoGen: Deep Multi-Omics Biomarker Identification",
+  "monthlyTokenLimit": 5000000,
+  "usedTokens": 3421950,
+  "monthlyBudgetLimitUsd": 150.0,
+  "usedBudgetUsd": 89.45,
+  "requestCount": 1284,
+  "providerEndpoints": {
+    "primary": "https://api.openai.com/v1",
+    "backup": "https://api.anthropic.com/v1"
+  },
+  "approvedModels": [
+    {
+      "modelId": "gpt-4o-2024-05-13",
+      "provider": "OpenAI",
+      "approvedStatus": "APPROVED",
+      "maxContextTokens": 128000,
+      "costPer1kTokensUsd": 0.005,
+      "description": "Primary high-reasoning multimodal foundation model for algorithmic code refactoring."
+    },
+    {
+      "modelId": "claude-3-5-sonnet-20240620",
+      "provider": "Anthropic",
+      "approvedStatus": "APPROVED",
+      "maxContextTokens": 200000,
+      "costPer1kTokensUsd": 0.003,
+      "description": "Preferred model for statistical derivation logic and methodological verification."
+    },
+    {
+      "modelId": "gemini-2.5-pro",
+      "provider": "Google Vertex AI",
+      "approvedStatus": "APPROVED",
+      "maxContextTokens": 1000000,
+      "costPer1kTokensUsd": 0.0025,
+      "description": "High-throughput token processing for multi-megabyte RNA expression matrices."
+    },
+    {
+      "modelId": "llama-3-70b-instruct",
+      "provider": "Local Ollama",
+      "approvedStatus": "SUSPENDED",
+      "maxContextTokens": 32768,
+      "costPer1kTokensUsd": 0.0,
+      "description": "On-premise air-gapped compute node for confidential patient cohort features."
+    }
+  ]
+}

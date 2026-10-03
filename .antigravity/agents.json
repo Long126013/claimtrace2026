@@ -1,0 +1,101 @@
+{
+  "$schema": "https://antigravity.google/schemas/agent-pipeline.json",
+  "project": "ClaimTrace - Academic Research Provenance & Evidence Audit Platform",
+  "version": "1.0.0",
+  "description": "Multi-agent sequential development pipeline: Orchestration -> Requirements -> Frontend -> Backend -> QA & Testing",
+  "pipeline": {
+    "execution_mode": "sequential",
+    "stages": [
+      {
+        "order": 1,
+        "id": "orchestration",
+        "agent": "orchestrator",
+        "name": "Điều Phối (Project Orchestrator & Coordinator)",
+        "role": "Pipeline Lead & Dispatcher",
+        "definition": ".antigravity/agents/01_orchestrator.md"
+      },
+      {
+        "order": 2,
+        "id": "requirements",
+        "agent": "requirements_analyst",
+        "name": "Đọc & Phân Tích Requirement (Requirements Analyst)",
+        "role": "Product Spec & Domain Architect",
+        "definition": ".antigravity/agents/02_requirements_analyst.md"
+      },
+      {
+        "order": 3,
+        "id": "frontend",
+        "agent": "frontend_engineer",
+        "name": "Code Frontend (Senior Frontend Architect)",
+        "role": "UI/UX & React Implementation",
+        "definition": ".antigravity/agents/03_frontend_engineer.md"
+      },
+      {
+        "order": 4,
+        "id": "backend",
+        "agent": "backend_engineer",
+        "name": "Code Backend (Backend & Systems Architect)",
+        "role": "API, Database & PROV-O Architecture",
+        "definition": ".antigravity/agents/04_backend_engineer.md"
+      },
+      {
+        "order": 5,
+        "id": "testing",
+        "agent": "qa_test_engineer",
+        "name": "Kiểm Thử & Đảm Bảo Chất Lượng (QA / Test Engineer)",
+        "role": "Automated Testing, Verification & Sign-off",
+        "definition": ".antigravity/agents/05_qa_test_engineer.md"
+      }
+    ]
+  },
+  "agents": {
+    "orchestrator": {
+      "name": "Orchestrator",
+      "title": "Master Project Coordinator & Pipeline Dispatcher",
+      "model": "gemini-2.5-pro",
+      "temperature": 0.2,
+      "capabilities": ["workflow_management", "task_delegation", "quality_gate_audit", "milestone_tracking"],
+      "tools": ["read_file", "run_command", "send_message", "manage_task"],
+      "output_artifacts": ["WORK_PLAN.md", "EXECUTION_LOG.md", "FINAL_DELIVERY_REPORT.md"]
+    },
+    "requirements_analyst": {
+      "name": "RequirementsAnalyst",
+      "title": "Requirements Analyst & Product Architect",
+      "model": "gemini-2.5-pro",
+      "temperature": 0.2,
+      "capabilities": ["requirement_elicitation", "domain_modeling", "api_contract_definition", "acceptance_criteria"],
+      "tools": ["read_file", "search_web", "write_to_file"],
+      "output_artifacts": ["REQUIREMENTS_SPEC.md", "API_CONTRACTS.md", "ACCEPTANCE_CRITERIA.md"]
+    },
+    "frontend_engineer": {
+      "name": "FrontendEngineer",
+      "title": "Senior Frontend Architect & UI Engineer",
+      "model": "gemini-2.5-pro",
+      "temperature": 0.2,
+      "capabilities": ["react19", "typescript_strict", "tailwind_css", "zustand_state", "w3c_prov_ui"],
+      "tools": ["read_file", "write_to_file", "replace_file_content", "run_command"],
+      "tech_stack": ["React 19", "TypeScript", "Tailwind CSS", "Vite", "Lucide React", "Zustand"],
+      "output_artifacts": ["src/pages/*", "src/components/*", "src/store/*", "src/types/*"]
+    },
+    "backend_engineer": {
+      "name": "BackendEngineer",
+      "title": "Backend & Systems Architect",
+      "model": "gemini-2.5-pro",
+      "temperature": 0.2,
+      "capabilities": ["rest_api", "database_design", "prov_o_serialization", "ro_crate_jsonld", "crypto_validation"],
+      "tools": ["read_file", "write_to_file", "replace_file_content", "run_command"],
+      "tech_stack": ["Node.js / Express / Fastify / Python FastAPI", "JSON-LD", "W3C PROV-O", "SHA-256"],
+      "output_artifacts": ["src/services/*", "api/*", "schemas/*", "models/*"]
+    },
+    "qa_test_engineer": {
+      "name": "QaTestEngineer",
+      "title": "Quality Assurance & Test Automation Specialist",
+      "model": "gemini-2.5-flash",
+      "temperature": 0.1,
+      "capabilities": ["unit_testing", "e2e_testing", "static_analysis", "regression_testing", "security_audit"],
+      "tools": ["read_file", "run_command", "write_to_file"],
+      "tech_stack": ["Vitest", "Playwright", "TypeScript Compiler (tsc)", "Oxlint / ESLint"],
+      "output_artifacts": ["tests/*", "TEST_REPORT.md", "QUALITY_SIGN_OFF.md"]
+    }
+  }
+}

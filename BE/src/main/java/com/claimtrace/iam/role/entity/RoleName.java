@@ -3,7 +3,9 @@ package com.claimtrace.iam.role.entity;
 public enum RoleName {
     ADMIN,
     PRINCIPAL_INVESTIGATOR,
-    RESEARCHER;
+    RESEARCHER,
+    REVIEWER,
+    AUDITOR;
 
     public static boolean isValid(String roleName) {
         if (roleName == null) {

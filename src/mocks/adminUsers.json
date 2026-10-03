@@ -1,0 +1,57 @@
+[
+  {
+    "id": "usr-001",
+    "fullName": "Prof. Elena Rostova",
+    "email": "e.rostova@stanford.edu",
+    "role": "PI",
+    "status": "ACTIVE",
+    "joinedDate": "2024-01-15",
+    "institution": "Stanford University Medical Center",
+    "orcid": "0000-0002-1825-0097",
+    "avatarUrl": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150"
+  },
+  {
+    "id": "usr-002",
+    "fullName": "Dr. Marcus Vance",
+    "email": "m.vance@mit.edu",
+    "role": "RESEARCHER",
+    "status": "ACTIVE",
+    "joinedDate": "2024-03-20",
+    "institution": "MIT Computer Science & AI Lab",
+    "orcid": "0000-0001-9283-4412",
+    "avatarUrl": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150"
+  },
+  {
+    "id": "usr-003",
+    "fullName": "Sarah Jenkins, M.Sc.",
+    "email": "s.jenkins@ox.ac.uk",
+    "role": "ADMIN",
+    "status": "ACTIVE",
+    "joinedDate": "2023-11-01",
+    "institution": "Oxford Genomics Institute",
+    "orcid": "0000-0003-4412-8819",
+    "avatarUrl": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150"
+  },
+  {
+    "id": "usr-004",
+    "fullName": "Prof. Kenji Takahashi",
+    "email": "k.takahashi@u-tokyo.ac.jp",
+    "role": "REVIEWER",
+    "status": "ACTIVE",
+    "joinedDate": "2024-06-10",
+    "institution": "University of Tokyo",
+    "orcid": "0000-0002-9901-3142",
+    "avatarUrl": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150"
+  },
+  {
+    "id": "usr-005",
+    "fullName": "David Chen",
+    "email": "d.chen@broadinstitute.org",
+    "role": "RESEARCHER",
+    "status": "INACTIVE",
+    "joinedDate": "2024-02-14",
+    "institution": "Broad Institute of MIT and Harvard",
+    "orcid": "0000-0003-1102-4910",
+    "avatarUrl": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150"
+  }
+]

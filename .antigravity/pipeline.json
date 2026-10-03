@@ -1,0 +1,118 @@
+{
+  "$schema": "https://antigravity.google/schemas/pipeline.json",
+  "pipeline_name": "Antigravity Sequential SDLC Pipeline",
+  "target_project": "ClaimTrace",
+  "stages": [
+    {
+      "stage_id": "STAGE_01_ORCHESTRATION",
+      "agent_ref": "orchestrator",
+      "display_name": "1. Điều Phối & Khởi Tạo Dự Án (Project Orchestration)",
+      "goal": "Phân tích phạm vi, lập Work Breakdown Structure (WBS), thiết lập các mốc bàn giao và điều phối luồng làm việc.",
+      "inputs": ["User Prompt", "Current Codebase State", "Issue Backlog"],
+      "outputs": [
+        ".antigravity/artifacts/EXECUTION_PLAN.md",
+        ".antigravity/artifacts/DISPATCH_MANIFEST.json"
+      ],
+      "exit_criteria": [
+        "Phạm vi công việc (Scope) được xác định rõ ràng, không mâu thuẫn.",
+        "Danh sách nhiệm vụ cụ thể được giao cho Requirements Analyst.",
+        "Kế hoạch triển khai được phê duyệt."
+      ],
+      "next_stage": "STAGE_02_REQUIREMENTS"
+    },
+    {
+      "stage_id": "STAGE_02_REQUIREMENTS",
+      "agent_ref": "requirements_analyst",
+      "display_name": "2. Đọc & Phân Tích Requirement (Requirements Analysis)",
+      "goal": "Phân tích yêu cầu chức năng, phi chức năng, tiêu chuẩn học thuật (W3C PROV-O, RO-Crate, COPE), lập tài liệu đặc tả kỹ thuật.",
+      "inputs": [
+        ".antigravity/artifacts/EXECUTION_PLAN.md",
+        "Tài liệu nghiệp vụ, mô tả bài báo, phản hồi người dùng"
+      ],
+      "outputs": [
+        ".antigravity/artifacts/REQUIREMENTS_SPEC.md",
+        ".antigravity/artifacts/DATA_CONTRACTS.ts",
+        ".antigravity/artifacts/ACCEPTANCE_CRITERIA.md"
+      ],
+      "exit_criteria": [
+        "Mô tả chi tiết từng User Story với tiêu chí nghiệm thu (Given-When-Then).",
+        "Data Model & Type Interface được định nghĩa rõ ràng.",
+        "API contract giữa Frontend và Backend được đồng thuận."
+      ],
+      "next_stage": "STAGE_03_FRONTEND"
+    },
+    {
+      "stage_id": "STAGE_03_FRONTEND",
+      "agent_ref": "frontend_engineer",
+      "display_name": "3. Phát Triển Frontend (Frontend Implementation)",
+      "goal": "Xây dựng giao diện UI/UX trực quan, tương tác cao, tuân thủ nghiêm ngặt Design System học thuật (Google Docs / Linear vibe), tích hợp State Store.",
+      "inputs": [
+        ".antigravity/artifacts/REQUIREMENTS_SPEC.md",
+        ".antigravity/artifacts/DATA_CONTRACTS.ts"
+      ],
+      "outputs": [
+        "src/pages/*",
+        "src/components/*",
+        "src/store/*",
+        "src/types/*"
+      ],
+      "exit_criteria": [
+        "Tất cả màn hình và component được render đúng yêu cầu spec.",
+        "Thiết kế Light Mode thanh lịch (#F8F9FA canvas, #FFFFFF card, #E2E8F0 border).",
+        "State management phản hồi tức thì, không bị re-render thừa.",
+        "TypeScript build không có lỗi cú pháp hoặc type mismatch."
+      ],
+      "next_stage": "STAGE_04_BACKEND"
+    },
+    {
+      "stage_id": "STAGE_04_BACKEND",
+      "agent_ref": "backend_engineer",
+      "display_name": "4. Phát Triển Backend & Service Layer (Backend Implementation)",
+      "goal": "Xây dựng service API, xử lý mật mã SHA-256, chuẩn hóa W3C PROV-O ontology, xuất nhập RO-Crate 1.1 JSON-LD, quản lý cơ sở dữ liệu.",
+      "inputs": [
+        ".antigravity/artifacts/REQUIREMENTS_SPEC.md",
+        ".antigravity/artifacts/DATA_CONTRACTS.ts",
+        "src/types/*"
+      ],
+      "outputs": [
+        "src/services/*",
+        "api/*",
+        "schemas/*"
+      ],
+      "exit_criteria": [
+        "Các endpoint API đáp ứng đúng Data Contract đã thỏa thuận.",
+        "Xác thực hash mật mã SHA-256 và phát hiện staleness chính xác.",
+        "Export RO-Crate đạt chuẩn JSON-LD 1.1 và W3C Open Annotation.",
+        "Backend sẵn sàng tích hợp hoặc kết nối với Frontend."
+      ],
+      "next_stage": "STAGE_05_TESTING"
+    },
+    {
+      "stage_id": "STAGE_05_TESTING",
+      "agent_ref": "qa_test_engineer",
+      "display_name": "5. Kiểm Thử & Đảm Bảo Chất Lượng (QA & Testing)",
+      "goal": "Thực hiện kiểm thử đơn vị, kiểm thử tích hợp, kiểm tra static analysis (tsc, oxlint), xác minh toàn bộ tiêu chí nghiệm thu.",
+      "inputs": [
+        ".antigravity/artifacts/ACCEPTANCE_CRITERIA.md",
+        "Toàn bộ source code dự án"
+      ],
+      "outputs": [
+        "tests/*",
+        ".antigravity/artifacts/TEST_REPORT.md",
+        ".antigravity/artifacts/QUALITY_SIGN_OFF.md"
+      ],
+      "exit_criteria": [
+        "npx tsc -b: 0 lỗi Type.",
+        "npm run lint (oxlint/eslint): 0 lỗi, 0 cảnh báo.",
+        "Các test case unit/integration đều PASS.",
+        "Không có hồi quy (regression) trên các tính năng hiện tại."
+      ],
+      "fallback_on_failure": {
+        "frontend_bug": "STAGE_03_FRONTEND",
+        "backend_bug": "STAGE_04_BACKEND",
+        "spec_gap": "STAGE_02_REQUIREMENTS"
+      },
+      "next_stage": "COMPLETED"
+    }
+  ]
+}

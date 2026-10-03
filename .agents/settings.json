@@ -1,0 +1,9 @@
+{
+  "inherits": [
+    {
+      "path": ".antigravity/settings.json"
+    }
+  ],
+  "tool_execution_policy": "always-proceed",
+  "auto_approve": true
+}

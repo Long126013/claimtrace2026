@@ -48,7 +48,7 @@ public class RoleService {
             cleaned = cleaned.substring(5);
         }
         if (!RoleName.isValid(cleaned)) {
-            throw new InvalidRoleException(String.format("Invalid role: '%s'. Allowed roles are ADMIN, PRINCIPAL_INVESTIGATOR, RESEARCHER", roleName));
+            throw new InvalidRoleException(String.format("Invalid role: '%s'. Allowed roles are ADMIN, PRINCIPAL_INVESTIGATOR, RESEARCHER, REVIEWER, AUDITOR", roleName));
         }
         return cleaned;
     }

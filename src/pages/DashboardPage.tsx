@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useProvenanceStore } from '../store/useProvenanceStore';
+import { useAuth } from '../context/AuthContext';
 import { NewProjectModal } from '../components/modals/NewProjectModal';
 import type { ProjectWorkspace } from '../types';
 import { 
@@ -14,19 +15,26 @@ import {
   ExternalLink,
   GitBranch,
   Building,
-  FileText
+  FileText,
+  LogOut,
+  Shield
 } from 'lucide-react';
 
 export const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
+  const { currentUser, logout, hasRole } = useAuth();
   const { projects, setActiveProjectId, setNewProjectModalOpen } = useProvenanceStore();
   const [searchQuery, setSearchQuery] = useState('');
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
+  };
 
   const filteredProjects = projects.filter((p: ProjectWorkspace) => 
     p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     p.domain?.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
 
   const handleSelectProject = (projectId: string) => {
     setActiveProjectId(projectId);
@@ -52,6 +60,16 @@ export const DashboardPage: React.FC = () => {
         </Link>
 
         <div className="flex items-center space-x-3">
+          {hasRole(['ADMIN', 'ROLE_ADMIN']) && (
+            <Link
+              to="/admin/users"
+              className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100 transition-colors shadow-2xs"
+            >
+              <Shield className="w-3.5 h-3.5" />
+              <span>Admin Portal</span>
+            </Link>
+          )}
+
           <button
             onClick={() => setNewProjectModalOpen(true)}
             className="inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded text-xs font-semibold bg-slate-900 text-white hover:bg-slate-800 active:bg-slate-950 transition-colors shadow-2xs"
@@ -59,6 +77,27 @@ export const DashboardPage: React.FC = () => {
             <FolderPlus className="w-3.5 h-3.5" />
             <span>+ Create New Research Workspace</span>
           </button>
+
+          {/* User Profile & Log Out Button */}
+          <div className="flex items-center space-x-2 pl-2 border-l border-slate-200">
+            <div className="hidden sm:flex flex-col text-right">
+              <span className="text-xs font-semibold text-slate-800 leading-tight">
+                {currentUser?.fullName || 'Researcher'}
+              </span>
+              <span className="text-[10px] font-mono text-slate-500 uppercase font-semibold">
+                {currentUser?.roles[0]?.replace('ROLE_', '') || 'RESEARCHER'}
+              </span>
+            </div>
+
+            <button
+              onClick={handleLogout}
+              title="Log out of session"
+              className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 rounded text-xs font-semibold transition-colors shadow-2xs"
+            >
+              <LogOut className="w-3.5 h-3.5 text-red-600" />
+              <span>Log Out</span>
+            </button>
+          </div>
         </div>
       </header>
 
@@ -73,25 +112,33 @@ export const DashboardPage: React.FC = () => {
             <div>
               <div className="flex items-center space-x-2">
                 <h1 className="text-lg font-bold text-slate-900">
-                  Dr. Alice Vance
+                  {currentUser?.fullName || 'Academic Researcher'}
                 </h1>
-                <a
-                  href="https://orcid.org/0000-0002-1825-0097"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center text-[11px] font-mono bg-emerald-50 text-emerald-800 px-2 py-0.5 rounded border border-emerald-200 hover:bg-emerald-100 transition-colors"
-                >
-                  ORCID: 0000-0002-1825-0097
-                  <ExternalLink className="w-2.5 h-2.5 ml-1" />
-                </a>
+                {currentUser?.orcid ? (
+                  <a
+                    href={`https://orcid.org/${currentUser.orcid}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center text-[11px] font-mono bg-emerald-50 text-emerald-800 px-2 py-0.5 rounded border border-emerald-200 hover:bg-emerald-100 transition-colors"
+                  >
+                    ORCID: {currentUser.orcid}
+                    <ExternalLink className="w-2.5 h-2.5 ml-1" />
+                  </a>
+                ) : (
+                  <span className="inline-flex items-center text-[11px] font-mono bg-slate-100 text-slate-700 px-2 py-0.5 rounded border border-slate-200">
+                    {currentUser?.email || 'authenticated'}
+                  </span>
+                )}
               </div>
               <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500 mt-1">
                 <span className="flex items-center">
                   <Building className="w-3.5 h-3.5 mr-1 text-slate-400" />
-                  Oncology Research Institute
+                  {currentUser?.organization || 'Academic Research Laboratory'}
                 </span>
                 <span>•</span>
-                <span>Role: Principal Investigator & Audit Reviewer</span>
+                <span>
+                  Role: {currentUser?.roles.map(r => r.replace('ROLE_', '')).join(', ') || 'RESEARCHER'}
+                </span>
               </div>
             </div>
           </div>

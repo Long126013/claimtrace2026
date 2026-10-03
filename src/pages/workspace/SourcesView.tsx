@@ -345,10 +345,10 @@ export const SourcesView: React.FC = () => {
               >
                 <button
                   onClick={handleOpenBindingModal}
-                  className="flex items-center space-x-1.5 px-3 py-1 bg-slate-900 text-white text-xs font-sans font-medium rounded shadow-md hover:bg-slate-800 transition-all border border-slate-700"
+                  className="flex items-center space-x-1.5 px-3 py-1.5 bg-slate-900 text-white text-xs font-sans font-medium rounded shadow-md hover:bg-slate-800 transition-all border border-slate-700"
                 >
                   <BookmarkPlus className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>+ Assert as Claim</span>
+                  <span>📌 Anchor as Scientific Claim</span>
                 </button>
               </div>
             )}

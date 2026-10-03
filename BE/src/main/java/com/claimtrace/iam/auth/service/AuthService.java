@@ -64,10 +64,18 @@ public class AuthService {
         user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         user.setEnabled(true);
 
-        // Assign default role: RESEARCHER
-        Role defaultRole = roleService.getRoleByName(RoleName.RESEARCHER.name());
+        // Assign requested role or default to RESEARCHER
+        String targetRoleName = RoleName.RESEARCHER.name();
+        if (request.getRole() != null && !request.getRole().isBlank()) {
+            try {
+                targetRoleName = roleService.normalizeRoleName(request.getRole());
+            } catch (Exception e) {
+                log.warn("Invalid role requested during registration: '{}', falling back to RESEARCHER", request.getRole());
+            }
+        }
+        Role assignedRole = roleService.getRoleByName(targetRoleName);
         Set<Role> roles = new HashSet<>();
-        roles.add(defaultRole);
+        roles.add(assignedRole);
         user.setRoles(roles);
 
         User savedUser = userRepository.save(user);

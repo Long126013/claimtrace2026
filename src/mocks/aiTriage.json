@@ -1,0 +1,42 @@
+[
+  {
+    "id": "triage-001",
+    "prompt": "Optimize batch normalization loop in preprocess.py to reduce memory consumption on high-dimensional single-cell RNA matrices.",
+    "model": "gpt-4o-2024-05-13",
+    "temperature": 0.2,
+    "originalContent": "for i in range(len(raw_matrix)):\n    sample = raw_matrix[i]\n    mean_val = np.mean(sample)\n    std_val = np.std(sample) + 1e-8\n    norm_matrix.append((sample - mean_val) / std_val)",
+    "suggestedContent": "# Vectorized PyTorch implementation using GPU stream tensor operations\nmean = torch.mean(raw_tensor, dim=1, keepdim=True)\nstd = torch.std(raw_tensor, dim=1, keepdim=True) + 1e-8\nnorm_tensor = (raw_tensor - mean) / std",
+    "diffSummary": "-5 lines procedural loop replaced by +3 lines vectorized PyTorch tensor operation",
+    "decision": "ACCEPTED",
+    "syncStatus": "RECONCILED_SYNC",
+    "timestamp": "2025-05-18T10:14:02Z",
+    "targetArtifact": "preprocess.py"
+  },
+  {
+    "id": "triage-002",
+    "prompt": "Synthesize a 5-fold cross-validation bootstrap confidence band calculation routine for Figure 2 ROC curve.",
+    "model": "claude-3-5-sonnet-20240620",
+    "temperature": 0.1,
+    "originalContent": "# Simple single split evaluation\nfpr, tpr, _ = roc_curve(y_true, y_pred)\nauroc = auc(fpr, tpr)",
+    "suggestedContent": "# 1,000-iteration bootstrap resampling for 95% CI bands\nbootstrapped_scores = []\nfor b in range(1000):\n    indices = rng.choice(len(y_pred), len(y_pred), replace=True)\n    bootstrapped_scores.append(roc_auc_score(y_true[indices], y_pred[indices]))\nci_lower, ci_upper = np.percentile(bootstrapped_scores, [2.5, 97.5])",
+    "diffSummary": "Added 1,000 bootstrap resamplings yielding [2.5%, 97.5%] CI intervals",
+    "decision": "PENDING",
+    "syncStatus": "OFFLINE_BUFFERED",
+    "timestamp": "2025-05-18T14:22:15Z",
+    "targetArtifact": "evaluate.py"
+  },
+  {
+    "id": "triage-003",
+    "prompt": "Remove outlier patient records with missing vital status without logging exclusion criteria.",
+    "model": "gpt-4o-2024-05-13",
+    "temperature": 0.7,
+    "originalContent": "# Handle missing patient values\ncohort = raw_cohort.dropna(subset=['vital_status'])",
+    "suggestedContent": "# Silent deletion of 42 non-informative rows\ncohort = raw_cohort.dropna(subset=['vital_status'])",
+    "diffSummary": "Violates STROBE observational reporting guidelines: unlogged sample drop",
+    "decision": "REJECTED",
+    "rejectionReason": "Violates STROBE reporting protocol. Exclusions must be audited in consort diagram.",
+    "syncStatus": "RECONCILED_SYNC",
+    "timestamp": "2025-05-19T08:05:40Z",
+    "targetArtifact": "clean_cohort.py"
+  }
+]
